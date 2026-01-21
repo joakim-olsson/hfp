@@ -132,7 +132,7 @@ app.use((req, _res, next) => {
 });
 
 app.post('/api/visit', (req, res) => {
-  const { width, height, userAgent: reportedUserAgent } = req.body ?? {};
+  const { width, height, userAgent: reportedUserAgent, features } = req.body ?? {};
 
   logVisit({
     req,
@@ -149,6 +149,8 @@ app.post('/api/visit', (req, res) => {
   } else {
     console.log("This is a human")
   }
+
+  console.log(features)
 
   res.sendStatus(204);
 });

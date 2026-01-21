@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import './App.css';
+import './modernizr.js';
 
 const throttle = (fn, delay) => {
   let lastCall = 0;
@@ -21,11 +22,13 @@ export default function App() {
     "mouseMoves": [],
     "scrolls": [],
     "keypresses": [],
+    "features": {},
   });
 
   const submitData = () => {
     data.current.clicked_at = performance.timeOrigin + performance.now();
-    
+    data.current.features = window.Modernizr || {};
+
     fetch('/api/visit', {
       method: 'POST',
       headers: {
