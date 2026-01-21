@@ -21,7 +21,28 @@ function getStats(body) {
     timeToCompletion: body.clicked_at - body.loaded_at,
     numClicks: body.clicks?.length,
     entropyStats: mouseEntropy(body.mouseMoves),
+    hasTabEnterSequence: findTabEnterSequences(body.keypresses)
   }
+}
+
+function findTabEnterSequences(events) {
+  const matches = [];
+
+  for (let i = 0; i < events.length - 1; i++) {
+    const current = events[i];
+    const next = events[i + 1];
+
+    if (current.keycode === 'Tab' && next.keycode === 'Enter') {
+      matches.push({
+        startIndex: i,
+        endIndex: i + 1,
+        startTs: current.ts,
+        endTs: next.ts
+      });
+    }
+  }
+
+  return matches;
 }
 
 function isBot(stats) {
@@ -34,6 +55,9 @@ function isBot(stats) {
   }
 
   if (stats.entropyStats.distanceEntropy < 0.5) {
+    if (stats.hasTabEnterSequence) {
+      return false
+    }
     return true
   }
 
