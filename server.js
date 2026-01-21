@@ -142,17 +142,20 @@ app.post('/api/visit', (req, res) => {
     note: 'client-metrics',
   });
 
+  var responseText = "bot"
+
   const stats = getStats(req.body)
   if (isBot(stats)) {
     console.log("This is a bot!")
     console.log(stats)
   } else {
+    responseText = "user"
     console.log("This is a human")
   }
 
   console.log(features)
 
-  res.sendStatus(204);
+  res.status(200).send(responseText);
 });
 
 const distDir = path.resolve(__dirname, 'dist');
