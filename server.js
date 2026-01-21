@@ -29,7 +29,7 @@ function isBot(stats) {
     return false
   }
 
-  if (stats.timeToCompletion < 200) {
+  if (stats.timeToCompletion < 100) {
     return true
   }
 
