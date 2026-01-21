@@ -20,6 +20,7 @@ export default function App() {
     "clicks": [],
     "mouseMoves": [],
     "scrolls": [],
+    "keypresses": [],
   });
 
   const submitData = () => {
@@ -65,6 +66,7 @@ export default function App() {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
+  // Capture mouse events
   useEffect(() => {
     const handleMouseMove = throttle((e) => {
       data.current.mouseMoves.push({
@@ -100,6 +102,20 @@ export default function App() {
       window.removeEventListener('click', handleClick);
       window.removeEventListener('scroll', handleScroll);
     };
+  }, []);
+
+  // Capture keypresses
+  useEffect(() => {
+    const logKeypress = (event) => {
+      data.current.keypresses.push({
+        "ts": performance.timeOrigin + performance.now(),
+        "keycode": event.code,
+      })
+    };
+
+    window.addEventListener('keydown', logKeypress);
+
+    return () => window.removeEventListener('keydown', logKeypress);
   }, []);
 
   return (
