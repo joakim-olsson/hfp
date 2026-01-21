@@ -175,9 +175,10 @@ app.post('/api/visit', (req, res) => {
   } else {
     responseText = "user"
     console.log("This is a human")
+    console.log(stats)
   }
 
-  console.log(features)
+  // console.log(features)
 
   res.status(200).send(responseText);
 });

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import './modernizr.js';
 
@@ -14,6 +14,7 @@ const throttle = (fn, delay) => {
 };
 
 export default function App() {
+  const [botStatus, setBotStatus] = useState("NOT_DETERMINED")
   const buttonRef = useRef(null);
   const data = useRef({
     "loaded_at": performance.timeOrigin + performance.now(),
@@ -30,28 +31,31 @@ export default function App() {
     const submitData = (event) => {
       data.current.clicked_at = performance.timeOrigin + performance.now();
 
-      fetch('/api/visit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data.current),
+    fetch('/api/visit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data.current),
+    })
+      .then(result => result.text()) // read the response as text
+      .then(text => {
+        console.log('Response body:', text);
+        if (text === "bot") {
+          setBotStatus("BOT")
+        }
+        else if (text === "user") {
+          setBotStatus("HUMAN")
+        }
+        else {
+          setBotStatus("FAILED")
+        }
+
       })
-        .then((result) => { result.text() })
-        .then((text) => { alert(text) })
-        .catch((error) => {
-          console.error('Failed to report visit', error);
-        });
-    };
-
-    const button = buttonRef.current;
-    button.addEventListener('click', submitData);
-
-    return () => {
-      const button = buttonRef.current;
-      button.removeEventListener('click', submitData);
-    }
-  }, []);
+      .catch((error) => {
+        console.error('Failed to report visit', error);
+      });
+  };
 
   // Capture window size changes
   useEffect(() => {
@@ -133,6 +137,16 @@ export default function App() {
     <div className="fingerprint-container">
       <h2>User identification in progress</h2>
       <button ref={buttonRef}>I am human</button>
+      {botStatus === "BOT" && 
+        <h1 style={{ color: "red" }}>
+          This is a Bot!!!
+        </h1>
+      }
+      {botStatus === "HUMAN" && 
+        <h1 style={{ color: "green" }}>
+          Welcome Human :)
+        </h1>
+      } 
     </div>
   );
 }
