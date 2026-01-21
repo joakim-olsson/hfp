@@ -37,9 +37,9 @@ function isBot(stats) {
     return true
   }
 
-  if (stats.entropyStats.timeEntropy < 0.5) {
-    return true
-  }
+  // if (stats.entropyStats.timeEntropy < 0.5) {
+  //   return true
+  // }
 
   return false
 }
