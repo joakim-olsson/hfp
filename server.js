@@ -16,6 +16,34 @@ const getClientIp = (req) => {
   return forwardedFor?.split(',')[0]?.trim() || remoteAddress || 'unknown';
 };
 
+function getStats(body) {
+  return {
+    timeToCompletion: body.clicked_at - body.loaded_at,
+    numClicks: body.clicks.length,
+    entropyStats: mouseEntropy(body.mouseMoves),
+  }
+}
+
+function isBot(stats) {
+  if (stats.numClicks > 1) {
+    return false
+  }
+
+  if (stats.timeToCompletion < 200) {
+    return true
+  }
+
+  if (stats.entropyStats.distanceEntropy < 1) {
+    return true
+  }
+
+  if (stats.entropyStats.timeEntropy < 1) {
+    return true
+  }
+
+  return false
+}
+
 function mouseEntropy(events, options = {}) {
   if (!Array.isArray(events) || events.length < 2) {
     return { distanceEntropy: 0, timeEntropy: 0 };
@@ -114,8 +142,11 @@ app.post('/api/visit', (req, res) => {
     note: 'client-metrics',
   });
 
-  // console.log(req.body)
-  console.log(mouseEntropy(req.body.mouseMoves))
+  if (isBot(getStats(req.body))) {
+    console.log("This is a bot!")
+  } else {
+    console.log("This is a human")
+  }
 
   res.sendStatus(204);
 });
