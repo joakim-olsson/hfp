@@ -33,13 +33,11 @@ export default function App() {
       },
       body: JSON.stringify(data.current),
     })
+      .then((result) => { result.text() })
+      .then((text) => { alert(text) })
       .catch((error) => {
-        if (import.meta.env.DEV) {
-          console.warn('Failed to report visit', error);
-        }
+        console.error('Failed to report visit', error);
       });
-
-    alert("Identification complete, awaiting decision")
   };
 
   // Capture window size changes
