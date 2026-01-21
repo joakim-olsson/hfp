@@ -1,17 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
-const initialDimensions = () => {
-  if (typeof window === 'undefined') {
-    return { width: 0, height: 0 };
-  }
-
-  return {
-    width: window.innerWidth,
-    height: window.innerHeight,
-  };
-};
-
 export default function App() {
   const [dimensions, setDimensions] = useState(initialDimensions);
   const [userAgent, setUserAgent] = useState(() =>
@@ -22,6 +11,7 @@ export default function App() {
   const data = useRef({
     "loaded_at": performance.timeOrigin + performance.now(),
     "user_agent": navigator.userAgent,
+    "window_size": [],
   });
 
   const submitData = () => {
@@ -32,7 +22,7 @@ export default function App() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data.current),
     })
       .catch((error) => {
         if (import.meta.env.DEV) {
@@ -43,12 +33,22 @@ export default function App() {
     alert("Identification complete, awaiting decision")
   };
 
+  // Capture window size changes
   useEffect(() => {
     const updateDimensions = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      if (typeof window === 'undefined') {
+        const width = 0;
+        const height = 0;
+      } else {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+      }
+
+      data.current.window_size.push({
+        "ts": performance.timeOrigin + performance.now(),
+        "width": width,
+        "height": height,
+      })
     };
 
     updateDimensions();
@@ -56,46 +56,6 @@ export default function App() {
 
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
-
-  useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      setUserAgent(navigator.userAgent);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (hasReported.current) {
-      return;
-    }
-
-    if (!dimensions.width || !dimensions.height) {
-      return;
-    }
-
-    if (import.meta.env.DEV) {
-      hasReported.current = true;
-      return;
-    }
-
-    hasReported.current = true;
-
-    fetch('/api/visit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        width: dimensions.width,
-        height: dimensions.height,
-        userAgent,
-      }),
-    })
-      .catch((error) => {
-        if (import.meta.env.DEV) {
-          console.warn('Failed to report visit', error);
-        }
-      });
-  }, [dimensions.width, dimensions.height, userAgent]);
 
   return (
     <div className="fingerprint-container">
