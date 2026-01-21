@@ -19,7 +19,7 @@ const getClientIp = (req) => {
 function getStats(body) {
   return {
     timeToCompletion: body.clicked_at - body.loaded_at,
-    numClicks: body.clicks.length,
+    numClicks: body.clicks?.length,
     entropyStats: mouseEntropy(body.mouseMoves),
   }
 }
@@ -33,11 +33,11 @@ function isBot(stats) {
     return true
   }
 
-  if (stats.entropyStats.distanceEntropy < 1) {
+  if (stats.entropyStats.distanceEntropy < 0.5) {
     return true
   }
 
-  if (stats.entropyStats.timeEntropy < 1) {
+  if (stats.entropyStats.timeEntropy < 0.5) {
     return true
   }
 
@@ -142,8 +142,10 @@ app.post('/api/visit', (req, res) => {
     note: 'client-metrics',
   });
 
-  if (isBot(getStats(req.body))) {
+  const stats = getStats(req.body)
+  if (isBot(stats)) {
     console.log("This is a bot!")
+    console.log(stats)
   } else {
     console.log("This is a human")
   }
