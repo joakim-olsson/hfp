@@ -14,6 +14,7 @@ const throttle = (fn, delay) => {
 };
 
 export default function App() {
+  const buttonRef = useRef(null);
   const data = useRef({
     "loaded_at": performance.timeOrigin + performance.now(),
     "user_agent": navigator.userAgent,
@@ -25,23 +26,32 @@ export default function App() {
     "features": {},
   });
 
-  const submitData = () => {
-    data.current.clicked_at = performance.timeOrigin + performance.now();
-    data.current.features = window.Modernizr || {};
+  useEffect(() => {
+    const submitData = (event) => {
+      data.current.clicked_at = performance.timeOrigin + performance.now();
 
-    fetch('/api/visit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data.current),
-    })
-      .then((result) => { result.text() })
-      .then((text) => { alert(text) })
-      .catch((error) => {
-        console.error('Failed to report visit', error);
-      });
-  };
+      fetch('/api/visit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data.current),
+      })
+        .then((result) => { result.text() })
+        .then((text) => { alert(text) })
+        .catch((error) => {
+          console.error('Failed to report visit', error);
+        });
+    };
+
+    const button = buttonRef.current;
+    button.addEventListener('click', submitData);
+
+    return () => {
+      const button = buttonRef.current;
+      button.removeEventListener('click', submitData);
+    }
+  }, []);
 
   // Capture window size changes
   useEffect(() => {
@@ -95,12 +105,12 @@ export default function App() {
     }, 100);
 
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('click', handleClick);
+    window.addEventListener('click', handleClick, { capture: true });
     window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('click', handleClick);
+      window.removeEventListener('click', handleClick, { capture: true });
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -122,7 +132,7 @@ export default function App() {
   return (
     <div className="fingerprint-container">
       <h2>User identification in progress</h2>
-      <button onClick={submitData}>I am human</button>
+      <button ref={buttonRef}>I am human</button>
     </div>
   );
 }
