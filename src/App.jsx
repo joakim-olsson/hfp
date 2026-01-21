@@ -55,7 +55,15 @@ export default function App() {
       .catch((error) => {
         console.error('Failed to report visit', error);
       });
-  };
+    };
+
+    const button = buttonRef.current;
+    button.addEventListener('click', submitData);
+
+    return () => {
+      button.removeEventListener('click', submitData);
+    };
+  }, []);
 
   // Capture window size changes
   useEffect(() => {
