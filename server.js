@@ -42,7 +42,7 @@ function findTabEnterSequences(events) {
     }
   }
 
-  return matches;
+  return matches.length > 0;
 }
 
 function isBot(stats) {
