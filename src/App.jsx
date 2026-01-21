@@ -31,13 +31,30 @@ export default function App() {
     const submitData = (event) => {
       data.current.clicked_at = performance.timeOrigin + performance.now();
 
-    fetch('/api/visit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data.current),
-    })
+      window.Modernizr['isWebDriver'] = navigator.webdriver === true;
+      window.Modernizr['noLanguages'] = !navigator.languages || navigator.languages.length === 0
+      window.Modernizr['nativeChrome'] = !!window.chrome && (!window.chrome.runtime || window.chrome.runtime.toString().includes('Native'))
+      window.Modernizr['headless'] = navigator.userAgent.toLocaleLowerCase().includes('headless')
+
+      if (window.Modernizr.canvas) {
+          const gl = document.createElement('canvas').getContext('webgl');
+          window.Modernizr['glVendor'] = gl.getParameter(gl.VENDOR)
+          window.Modernizr['glRenderer'] = gl.getParameter(gl.RENDERER)
+      }
+
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+          window.Modernizr['mediaDevices'] = devices
+      });
+
+      data.current.features = window.Modernizr || {};
+
+      fetch('/api/visit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data.current),
+      })
       .then(result => result.text()) // read the response as text
       .then(text => {
         console.log('Response body:', text);
